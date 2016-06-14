@@ -1,0 +1,36 @@
+{
+  "manifest_version": 2,
+  "name": "Cloudinsight Dev",
+  "version": "0.0.1",
+  "description": "Developer Plugin for Cloudinsight",
+  "icons": {
+    "128": "icon_128.png"
+  },
+  "background": {
+    "scripts": [
+      "jquery-3.0.0.min.js",
+      "wilddog.min.js",
+      "lib/background.js"
+    ]
+  },
+  "permissions": [
+    "*://*.oneapm.com/*",
+    "https://*.cloudinsight.io/*",
+    "https://h0r0rop9h6vu9k8oxge5.wilddogio.com/*",
+    "alarms",
+    "storage",
+    "webRequest",
+    "webRequestBlocking"
+  ],
+  "browser_action": {
+    "default_title": "Cloudinsight Dev",
+    "default_icon": "icon_32.png",
+    "default_popup": "popup.html"
+  },
+  "options_ui": {
+    "chrome_style": true,
+    "page": "options.html"
+  },
+  "author": "wyvernnot",
+  "homepage_url": "https://github.com/cloudinsight/mini-chrome-extension"
+}
