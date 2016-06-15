@@ -1,7 +1,7 @@
 {
   "manifest_version": 2,
   "name": "Cloudinsight Dev",
-  "version": "0.0.1",
+  "version": "0.0.2",
   "description": "Developer Plugin for Cloudinsight",
   "icons": {
     "128": "icon_128.png"
@@ -27,5 +27,5 @@
     "default_popup": "popup.html"
   },
   "author": "wyvernnot",
-  "homepage_url": "https://github.com/cloudinsight/mini-chrome-extension"
+  "homepage_url": "https://github.com/cloudinsight/dev-chrome-extension"
 }
