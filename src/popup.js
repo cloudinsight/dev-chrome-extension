@@ -5,7 +5,7 @@ const element = document.createElement('div');
 const APP = props => {
   if (!props.URL) {
     return <div>
-      {localStorage.fed}
+      {localStorage.fed ? localStorage.fed : 'default'}
     </div>;
   }
 
