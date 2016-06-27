@@ -1,7 +1,7 @@
 {
   "manifest_version": 2,
   "name": "Cloudinsight Dev",
-  "version": "0.0.2",
+  "version": "0.0.3",
   "description": "Developer Plugin for Cloudinsight",
   "icons": {
     "128": "icon_128.png"
@@ -13,6 +13,7 @@
   },
   "permissions": [
     "*://*.oneapm.com/*",
+    "*://*.cloudinsight.cc/*",
     "https://h0r0rop9h6vu9k8oxge5.wilddogio.com/*",
     "alarms",
     "storage",

@@ -3,7 +3,8 @@ import Wilddog from 'wilddog';
 const ref = new Wilddog('https://h0r0rop9h6vu9k8oxge5.wilddogio.com/versions');
 const filter = {
   urls: [
-    "*://cloud.oneapm.com/*"
+    "*://cloud.oneapm.com/*",
+    "*://*.cloudinsight.cc/*"
   ]
 };
 const spec = ['requestHeaders', "blocking"];
