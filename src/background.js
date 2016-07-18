@@ -1,5 +1,8 @@
 import { parse } from 'url';
 import Wilddog from 'wilddog';
+import moment from 'moment';
+moment.locale('zh-cn');
+
 const ref = new Wilddog('https://h0r0rop9h6vu9k8oxge5.wilddogio.com/versions');
 const filter = {
   urls: [
@@ -72,6 +75,20 @@ const syncContextMenus = () => {
 ref.on('value', (snapshot) => {
   versionsMap = snapshot.val();
   syncContextMenus();
+});
+
+ref.on('child_added', (snapshot) => {
+  const newNode = snapshot.val();
+  // 如果是 1 小时之内的新版本就显示一个提示
+  if (Date.now() - newNode.BUILD_TIME < 3600000) {
+    chrome.notifications.create({
+      type: 'basic',
+      title: `新版本 #${newNode.BUILD_ID}`,
+      message: newNode.GIT_BRANCH,
+      contextMessage: moment(newNode.BUILD_TIME).fromNow(),
+      iconUrl: 'notification.png'
+    })
+  }
 });
 
 chrome.webRequest.onBeforeSendHeaders.addListener(detail => {
