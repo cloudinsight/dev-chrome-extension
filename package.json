@@ -1,6 +1,6 @@
 {
   "name": "dev-chrome-extension",
-  "version": "0.0.0",
+  "version": "0.0.4",
   "description": "cloudinsight",
   "main": "lib/background.js",
   "scripts": {
