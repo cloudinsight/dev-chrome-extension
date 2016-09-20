@@ -1,6 +1,9 @@
-import { parse } from 'url';
+import {parse} from 'url';
 import Wilddog from 'wilddog';
 import moment from 'moment';
+import ga from './ga';
+
+ga();
 moment.locale('zh-cn');
 
 const ref = new Wilddog('https://h0r0rop9h6vu9k8oxge5.wilddogio.com/versions');
@@ -16,6 +19,11 @@ const LOCAL = '127.0.0.1:8000';
 
 let versionsMap = {};
 const syncContextMenus = () => {
+  ga({
+    t: 'event',
+    ec: 'contextMenu',
+    ea: 'sync'
+  });
   chrome.contextMenus.removeAll(()=> {
 
     const currentFed = localStorage['fed'];
@@ -73,6 +81,11 @@ const syncContextMenus = () => {
 };
 
 ref.on('value', (snapshot) => {
+  ga({
+    t: 'event',
+    ec: 'wilddog',
+    ea: 'value'
+  });
   versionsMap = snapshot.val();
   syncContextMenus();
 });
@@ -81,9 +94,19 @@ ref.on('child_added', (snapshot) => {
   const newNode = snapshot.val();
   // 如果是 1 小时之内的新版本就显示一个提示
   if (Date.now() - newNode.BUILD_TIME < 3600000) {
+
+    const title = `新版本 #${newNode.BUILD_ID}`;
+
+    ga({
+      t: 'event',
+      ec: 'notifications',
+      ea: 'create',
+      el: title
+    });
+
     chrome.notifications.create({
       type: 'basic',
-      title: `新版本 #${newNode.BUILD_ID}`,
+      title,
       message: newNode.GIT_BRANCH,
       contextMessage: moment(newNode.BUILD_TIME).fromNow(),
       iconUrl: 'notification.png'
@@ -94,6 +117,13 @@ ref.on('child_added', (snapshot) => {
 chrome.webRequest.onBeforeSendHeaders.addListener(detail => {
   const fed = localStorage['fed'];
   if (fed && fed.length) {
+    ga({
+      t: 'event',
+      ec: 'setRequestHeader',
+      ea: 'fed',
+      el: fed
+    });
+
     detail.requestHeaders.push({
       name: 'fed',
       value: fed
@@ -105,6 +135,15 @@ chrome.webRequest.onBeforeSendHeaders.addListener(detail => {
 }, filter, spec);
 
 chrome.contextMenus.onClicked.addListener((info, tabs) => {
+  const target = versionsMap[info.menuItemId];
+
+  ga({
+    t: 'event',
+    ec: 'contextMenu',
+    ea: 'click',
+    el: (target && target.URL ) || info.menuItemId
+  });
+
   switch (info.menuItemId) {
     case 'none':
       delete localStorage.fed;
@@ -115,7 +154,6 @@ chrome.contextMenus.onClicked.addListener((info, tabs) => {
       delete localStorage.description;
       break;
     default:
-      const target = versionsMap[info.menuItemId];
       if (target) {
         localStorage.fed = target.URL;
         localStorage.description = JSON.stringify(target);

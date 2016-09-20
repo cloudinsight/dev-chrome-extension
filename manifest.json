@@ -1,7 +1,7 @@
 {
   "manifest_version": 2,
   "name": "Cloudinsight Dev",
-  "version": "0.0.4",
+  "version": "0.1.0",
   "description": "Developer Plugin for Cloudinsight",
   "icons": {
     "128": "icon_128.png"
@@ -15,6 +15,7 @@
     "*://*.oneapm.com/*",
     "*://*.cloudinsight.cc/*",
     "https://h0r0rop9h6vu9k8oxge5.wilddogio.com/*",
+    "http://www.google-analytics.com/",
     "alarms",
     "storage",
     "webRequest",

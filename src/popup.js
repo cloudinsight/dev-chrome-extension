@@ -1,6 +1,8 @@
 import React from 'react';
 import { render } from 'react-dom';
+import ga from './ga';
 
+ga();
 const element = document.createElement('div');
 const APP = props => {
   if (!props.URL) {
