@@ -5,7 +5,7 @@
   "main": "lib/background.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "dev": "webpack -w -d",
+    "dev": "webpack -w",
     "build": "rimraf lib && rimraf extension.zip && NODE_ENV=production webpack -p && zip -9 -r --exclude=*.git* --exclude=*node_modules* --exclude=*src* --exclude=*.idea* extension.zip ."
   },
   "repository": {

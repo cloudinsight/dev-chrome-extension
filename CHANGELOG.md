@@ -1,3 +1,6 @@
+#0.1.0
+- 添加 Google Analytics
+
 # v0.0.4
 
 - 上线提示

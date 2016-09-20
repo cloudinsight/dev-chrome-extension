@@ -2,6 +2,14 @@ import {parse} from 'url';
 import Wilddog from 'wilddog';
 import moment from 'moment';
 import ga from './ga';
+import Raven from 'raven-js';
+
+const details = chrome.app.getDetails();
+
+Raven.config('https://1c3c1427cc934c8dac02fa873e244754@sentry.cloudinsight.cc/8', {
+  release: details.version,
+  environment: chrome.app.getIsInstalled() ? 'Production' : 'Development'
+}).install()
 
 ga();
 moment.locale('zh-cn');
