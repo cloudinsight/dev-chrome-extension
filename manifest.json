@@ -24,6 +24,18 @@
     "tabs",
     "notifications"
   ],
+  "content_scripts": [
+    {
+      "matches": [
+        "*://*.oneapm.com/*",
+        "*://*.cloudinsight.cc/*"
+      ],
+      "js": [
+        "lib/content.js"
+      ],
+      "runat": "document_start"
+    }
+  ],
   "browser_action": {
     "default_title": "Cloudinsight Dev",
     "default_icon": "icon_32.png",

@@ -1,4 +1,4 @@
-import {parse} from 'url';
+import { parse } from 'url';
 import Wilddog from 'wilddog';
 import moment from 'moment';
 import ga from './ga';
@@ -175,4 +175,15 @@ chrome.contextMenus.onClicked.addListener((info, tabs) => {
     chrome.tabs.reload(tabs.id);
   }
 });
+
+chrome.runtime.onMessage.addListener(
+  function (request, sender, sendResponse) {
+    console.log(sender.tab ? "from a content script:" + sender.tab.url : "from the extension");
+    if (request === "get_info") {
+      sendResponse({
+        fed: localStorage['fed'],
+        versionsMap
+      })
+    }
+  });
 
