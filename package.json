@@ -21,6 +21,10 @@
   },
   "homepage": "https://github.com/cloudinsight/dev-chrome-extension#readme",
   "dependencies": {
+    "babel-core": "^6.24.0",
+    "babel-loader": "^6.4.1",
+    "babel-preset-es2015": "^6.24.0",
+    "rimraf": "^2.6.1",
     "underscore": "^1.8.3",
     "webpack": "^2.3.2",
     "wilddog": "^2.5.2"
