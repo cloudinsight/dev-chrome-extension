@@ -1,10 +1,10 @@
 {
   "manifest_version": 2,
   "name": "Cloudinsight Dev",
-  "version": "0.2.0",
+  "version": "0.4.0",
   "description": "Developer Plugin for Cloudinsight",
   "icons": {
-    "128": "icon_128.png"
+    "128": "assets/icon_128.png"
   },
   "background": {
     "scripts": [
@@ -38,8 +38,7 @@
   ],
   "browser_action": {
     "default_title": "Cloudinsight Dev",
-    "default_icon": "icon_32.png",
-    "default_popup": "popup.html"
+    "default_icon": "assets/icon_32.png"
   },
   "author": "wyvernnot",
   "homepage_url": "https://github.com/cloudinsight/dev-chrome-extension"

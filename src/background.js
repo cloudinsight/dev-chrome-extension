@@ -1,189 +1,94 @@
-import { parse } from 'url';
-import Wilddog from 'wilddog';
-import moment from 'moment';
-import ga from './ga';
-import Raven from 'raven-js';
+const fedSources = require('./lib/fedSources');
+const _ = require('underscore');
+const appendPayload = require('./lib/appendPayload');
+const renderBadge = require('./lib/renderBadge');
+const messageListener = require('./lib/messageListener');
+const MENU = require('./menu');
+const getConfig = require('./lib/getConfig');
 
-const details = chrome.app.getDetails();
-
-Raven.config('https://1c3c1427cc934c8dac02fa873e244754@sentry.cloudinsight.cc/8', {
-  release: details.version,
-  environment: chrome.app.getIsInstalled() ? 'Production' : 'Development'
-}).install()
-
-ga();
-moment.locale('zh-cn');
-
-const ref = new Wilddog('https://h0r0rop9h6vu9k8oxge5.wilddogio.com/versions');
-const filter = {
-  urls: [
-    "*://cloud.oneapm.com/*",
-    "*://*.cloudinsight.cc/*"
-  ]
-};
-const spec = ['requestHeaders', "blocking"];
-const CHOOSE_FED = 'choose_fed_version';
-const LOCAL = '127.0.0.1:8000';
-
-let versionsMap = {};
-const syncContextMenus = () => {
-  ga({
-    t: 'event',
-    ec: 'contextMenu',
-    ea: 'sync'
+/**
+ * 注册数据源
+ * @param category
+ * @param source
+ */
+const registerSources = (category, source) => {
+  source.on('items', items => {
+    MENU[category].options = items;
+    render();
   });
-  chrome.contextMenus.removeAll(()=> {
+};
 
-    const currentFed = localStorage['fed'];
+/**
+ * 初始化
+ */
+const initialize = () => {
+  registerSources('fed', fedSources);
+  appendPayload('fed', 'debug');
+  messageListener();
+};
 
-    if (currentFed === LOCAL) {
-      chrome.browserAction.setBadgeText({
-        text: 'dev'
-      })
-    } else {
-      chrome.browserAction.setBadgeText({
-        text: ''
-      })
-    }
+/**
+ * 渲染菜单
+ */
+const render = () => {
+  const config = getConfig();
+  // 清空所有菜单
+  chrome.contextMenus.removeAll();
 
+  renderBadge();
+  Object.keys(MENU).forEach(category => {
+    const {
+      title,
+      contexts,
+      options = [],
+      urls = []
+    } = MENU[category];
+
+    // 创建根菜单
     chrome.contextMenus.create({
-      id: CHOOSE_FED,
-      title: '选择前端版本',
-      contexts: ['browser_action']
+      id: category,
+      title,
+      contexts
     });
 
-    chrome.contextMenus.create({
-      type: 'radio',
-      id: 'none',
-      title: 'default',
-      contexts: ['browser_action'],
-      parentId: CHOOSE_FED,
-      checked: !currentFed
-    });
-
-    chrome.contextMenus.create({
-      type: 'radio',
-      id: 'dev',
-      title: LOCAL,
-      contexts: ['browser_action'],
-      parentId: CHOOSE_FED,
-      checked: currentFed === LOCAL
-    });
-
-    Object.keys(versionsMap).forEach(id => {
+    const currentValue = config.category;
+    options.forEach(option => {
+      // 创建子菜单
       chrome.contextMenus.create({
         type: 'radio',
-        id,
-        title: versionsMap[id].URL,
-        contexts: ['browser_action'],
-        parentId: CHOOSE_FED,
-        checked: currentFed === versionsMap[id].URL
+        id: `${category}-${option}`,
+        title: option,
+        checked: currentValue === option,
+        parentId: category,
+        contexts,
+        onclick: () => {
+          localStorage.setItem(category, option);
+          renderBadge();
+        }
       });
-      if (currentFed === versionsMap[id].URL) {
-        chrome.browserAction.setBadgeText({
-          text: versionsMap[id].BUILD_ID
-        })
-      }
     });
-  })
-};
 
-ref.on('value', (snapshot) => {
-  ga({
-    t: 'event',
-    ec: 'wilddog',
-    ea: 'value'
+    urls.forEach(option => {
+      // 创建子菜单
+      chrome.contextMenus.create({
+        id: `${category}-${option.href}`,
+        title: option.text,
+        parentId: category,
+        contexts,
+        onclick: () => {
+          chrome.tabs.create({
+            url: option.href
+          });
+        }
+      });
+    });
+
+
   });
-  versionsMap = snapshot.val();
-  syncContextMenus();
+}
+
+chrome.contextMenus.onClicked.addListener(function () {
+  console.log(arguments);
 });
 
-ref.on('child_added', (snapshot) => {
-  const newNode = snapshot.val();
-  // 如果是 1 小时之内的新版本就显示一个提示
-  if (Date.now() - newNode.BUILD_TIME < 3600000) {
-
-    const title = `新版本 #${newNode.BUILD_ID}`;
-
-    ga({
-      t: 'event',
-      ec: 'notifications',
-      ea: 'create',
-      el: title
-    });
-
-    chrome.notifications.create({
-      type: 'basic',
-      title,
-      message: newNode.GIT_BRANCH,
-      contextMessage: moment(newNode.BUILD_TIME).fromNow(),
-      iconUrl: 'notification.png'
-    })
-  }
-});
-
-chrome.webRequest.onBeforeSendHeaders.addListener(detail => {
-  const fed = localStorage['fed'];
-  if (fed && fed.length) {
-    ga({
-      t: 'event',
-      ec: 'setRequestHeader',
-      ea: 'fed',
-      el: fed
-    });
-
-    detail.requestHeaders.push({
-      name: 'fed',
-      value: fed
-    });
-  }
-  return {
-    requestHeaders: detail.requestHeaders
-  }
-}, filter, spec);
-
-chrome.contextMenus.onClicked.addListener((info, tabs) => {
-  const target = versionsMap[info.menuItemId];
-
-  ga({
-    t: 'event',
-    ec: 'contextMenu',
-    ea: 'click',
-    el: (target && target.URL ) || info.menuItemId
-  });
-
-  switch (info.menuItemId) {
-    case 'none':
-      delete localStorage.fed;
-      delete localStorage.description;
-      break;
-    case 'dev':
-      localStorage.fed = LOCAL;
-      delete localStorage.description;
-      break;
-    default:
-      if (target) {
-        localStorage.fed = target.URL;
-        localStorage.description = JSON.stringify(target);
-      } else {
-        console.info('%s has no target', info.menuItemId);
-        return;
-      }
-  }
-  syncContextMenus();
-  if (parse(tabs.url).hostname === 'cloud.oneapm.com') {
-    chrome.tabs.reload(tabs.id);
-  }
-});
-
-chrome.runtime.onMessage.addListener(
-  function (request, sender, sendResponse) {
-    console.log(sender.tab ? "from a content script:" + sender.tab.url : "from the extension");
-    if (request === "get_info") {
-      sendResponse({
-        fed: localStorage['fed'],
-        versionsMap
-      })
-    }
-  });
-
+initialize();
